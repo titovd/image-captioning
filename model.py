@@ -31,11 +31,21 @@ class CaptionNet(nn.Module):
         cnn_feature_size: int = 2048
     ):
         super(CaptionNet, self).__init__()
+        self.cnn_to_h0 = nn.Linear(cnn_feature_size, lstm_units)
+        self.cnn_to_c0 = nn.Linear(cnn_feature_size, lstm_units)
 
+        self.emb = nn.Embedding(n_tokens, emb_size)
+        self.lstm = nn.LSTM(emb_size, lstm_units, batch_first=True)
+        self.logits = nn.Linear(lstm_units, n_tokens)
 
     def forward(self, image_vectors, captions):
-        pass
+        initial_cell = self.cnn_to_c0(image_vectors)
+        initial_hidden = self.cnn_to_hidden(image_vectors)
 
+        captions_emb = self.emb(captions)
+        lstm_out, _ = self.lst(captions_emb, (initial_hidden[None], initial_cell[None]))
+        logits = self.lstm(lstm_out)
 
+        return logits
 
 

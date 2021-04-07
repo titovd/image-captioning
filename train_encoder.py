@@ -38,8 +38,8 @@ def main():
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                            std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225])
     ))
 
 
@@ -53,20 +53,19 @@ def main():
         dataset=coco_train,
         batch_size=args.batch_size,
         shuffle=False, 
-        num_workers=4
+        num_workers=2
     )
 
     model = EncoderCNN()
     model = nn.DataParallel(model.train(False).to(args.device))
 
     vectors, captions = [], []
-    with torch.no_grad():
-        for img_batch, capt_batch in tqdm(data_loader):
-            capt_batch = list(zip(*capt_batch))
-            vec_batch = model(img_batch)
+    for img_batch, capt_batch in tqdm(data_loader):
+        capt_batch = list(zip(*capt_batch))
+        vec_batch = model(img_batch)
 
-            captions.extend(capt_batch)
-            vectors.extend([vec for vec in vec_batch])
+        captions.extend(capt_batch)
+        vectors.extend([vec for vec in vec_batch])
 
     captions_tokenized = list([[caption.lower() for caption in caption_list] 
                                 for caption_list in captions])
